@@ -17,6 +17,7 @@ export enum Page {
   About,
   BookingHistory,
   PartnerRegistration,
+  Search,
 }
 
 export type User = {
@@ -49,6 +50,11 @@ export type Design = {
     description?: string;
 };
 
+export type Artist = {
+    initial: string, name: string, rating: number, reviews: number, services: string[], salon: string, distance: number, price: string, available: boolean
+};
+
+// FIX: Add definitions for Comment and Tutorial types used in community features to resolve import errors.
 export type Comment = {
   id: number;
   userName: string;

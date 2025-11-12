@@ -3,7 +3,7 @@ import { NailoraLogo, EyeOpenIcon, EyeClosedIcon, MailIcon, LockIcon } from '../
 import { User } from '../types';
 
 interface LoginScreenProps {
-  onLogin: (credentials: Pick<User, 'email' | 'password'>) => { success: boolean, message: string };
+  onLogin: (credentials: Pick<User, 'email' | 'password'>, rememberMe: boolean) => { success: boolean, message: string };
   onGoToRegister: () => void;
 }
 
@@ -12,6 +12,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGoToRegister }) =>
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleLoginClick = () => {
     setError('');
@@ -19,7 +20,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGoToRegister }) =>
       setError('Email dan password tidak boleh kosong.');
       return;
     }
-    const result = onLogin({ email, password });
+    const result = onLogin({ email, password }, rememberMe);
     if (!result.success) {
       setError(result.message);
     }
@@ -65,9 +66,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGoToRegister }) =>
           </div>
         </form>
 
-        <div className="text-right mt-2">
-          <a href="#" className="text-xs font-medium text-nailora-pink-accent hover:underline">Lupa Password?</a>
+        <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+                <input 
+                    id="remember-me" 
+                    name="remember-me" 
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 text-nailora-pink-accent focus:ring-nailora-pink-accent border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-nailora-gray">
+                    Ingat Saya
+                </label>
+            </div>
+            <a href="#" className="text-xs font-medium text-nailora-pink-accent hover:underline">Lupa Password?</a>
         </div>
+
 
         <button
           onClick={handleLoginClick}

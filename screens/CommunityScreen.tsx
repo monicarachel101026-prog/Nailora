@@ -31,7 +31,6 @@ interface CommunityPostProps {
 
 const CommunityPost: React.FC<CommunityPostProps> = ({ post, currentUser, onDelete }) => {
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-    const isOwner = post.userName === currentUser.name;
 
     const handleDeleteClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -64,34 +63,32 @@ const CommunityPost: React.FC<CommunityPostProps> = ({ post, currentUser, onDele
                     <HeartIcon className="w-5 h-5 text-red-400" />
                     <span className="text-sm font-semibold">{post.likes} suka</span>
                 </div>
-                 {isOwner && (
-                     <div className="absolute bottom-4 right-4">
-                        {showConfirmDelete ? (
-                             <div className="flex items-center gap-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-md z-10">
-                                 <button
-                                     onClick={handleCancelDelete}
-                                     className="bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1 rounded-md hover:bg-gray-300 transition-colors"
-                                 >
-                                     Batal
-                                 </button>
-                                 <button
-                                     onClick={handleConfirmDelete}
-                                     className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
-                                 >
-                                     Hapus
-                                 </button>
-                             </div>
-                        ) : (
+                 <div className="absolute bottom-4 right-4">
+                    {showConfirmDelete ? (
+                         <div className="flex items-center gap-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-lg shadow-md z-10">
                              <button
-                                 onClick={handleDeleteClick}
-                                 className="bg-red-500/50 backdrop-blur-sm p-1.5 rounded-full text-white hover:bg-red-500/80 transition-colors opacity-0 group-hover:opacity-100"
-                                 aria-label="Hapus Postingan"
+                                 onClick={handleCancelDelete}
+                                 className="bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1 rounded-md hover:bg-gray-300 transition-colors"
                              >
-                                 <TrashIcon className="w-4 h-4"/>
+                                 Batal
                              </button>
-                        )}
-                    </div>
-                )}
+                             <button
+                                 onClick={handleConfirmDelete}
+                                 className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                             >
+                                 Hapus
+                             </button>
+                         </div>
+                    ) : (
+                         <button
+                             onClick={handleDeleteClick}
+                             className="bg-red-500/50 backdrop-blur-sm p-1.5 rounded-full text-white hover:bg-red-500/80 transition-colors opacity-0 group-hover:opacity-100"
+                             aria-label="Hapus Postingan"
+                         >
+                             <TrashIcon className="w-4 h-4"/>
+                         </button>
+                    )}
+                </div>
             </div>
         </div>
     );

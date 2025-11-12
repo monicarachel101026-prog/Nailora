@@ -1,17 +1,15 @@
-
 import React, { useState, useMemo } from 'react';
-import { Page, BookingDetails } from '../types';
+import { Page, BookingDetails, Artist } from '../types';
 import BottomNavBar from '../components/BottomNavBar';
 import { FilterIcon, StarIcon } from '../components/icons';
+import { artists as artistsData } from '../data/artists';
 
 interface BookingScreenProps {
   setCurrentPage: (page: Page) => void;
   setBookingDetails: (details: BookingDetails) => void;
+  initialArtist?: Artist | null;
+  onClearInitialArtist: () => void;
 }
-
-type Artist = {
-    initial: string, name: string, rating: number, reviews: number, services: string[], salon: string, distance: number, price: string, available: boolean
-};
 
 interface ArtistCardProps extends Artist {
     onBook: () => void;
@@ -101,16 +99,9 @@ const BookingForm = ({ artist, onBack, onConfirmBooking }: { artist: Artist, onB
     );
 };
 
-const BookingScreen: React.FC<BookingScreenProps> = ({ setCurrentPage, setBookingDetails }) => {
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+const BookingScreen: React.FC<BookingScreenProps> = ({ setCurrentPage, setBookingDetails, initialArtist, onClearInitialArtist }) => {
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(initialArtist);
   const [activeFilter, setActiveFilter] = useState('Terdekat');
-
-  const artists: Artist[] = [
-    { initial: 'SM', name: 'Sarah Martinez', rating: 4.9, reviews: 156, services: ['Gel Extensions', 'Nail Art', '+1'], salon: 'Salon Cantik', distance: 0.8, price: '100K-200K', available: true },
-    { initial: 'LC', name: 'Luna Chen', rating: 4.7, reviews: 203, services: ['Minimalist Art', 'Gel Polish', '+1'], salon: 'Zen Nails Spa', distance: 3.2, price: '80K-150K', available: false },
-    { initial: 'AP', name: 'Alya Putri', rating: 4.9, reviews: 178, services: ['Gel Polish', 'French Manicure', '+1'], salon: 'Nailora Studio', distance: 2.5, price: '120K-180K', available: true },
-    { initial: 'ER', name: 'Emma Rodriguez', rating: 4.8, reviews: 89, services: ['Acrylic Nails', 'Custom Designs', '+1'], salon: 'Beauty Studio Plus', distance: 1.9, price: '150K-250K', available: true },
-  ];
   
   const handleConfirmBooking = (details: Omit<BookingDetails, 'artist'>) => {
       if (selectedArtist) {
@@ -125,13 +116,20 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ setCurrentPage, setBookin
       }
   };
 
+  const handleBackFromForm = () => {
+    setSelectedArtist(null);
+    if (initialArtist) {
+        onClearInitialArtist();
+    }
+  };
+
   const sortedArtists = useMemo(() => {
     const parsePrice = (price: string): number => {
         const priceString = price.split('K')[0];
         return parseInt(priceString, 10);
     };
 
-    const artistsToSort = [...artists];
+    const artistsToSort = [...artistsData];
 
     switch (activeFilter) {
         case 'Termurah':
@@ -156,7 +154,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ setCurrentPage, setBookin
       </div>
       
       {selectedArtist ? (
-        <BookingForm artist={selectedArtist} onBack={() => setSelectedArtist(null)} onConfirmBooking={handleConfirmBooking} />
+        <BookingForm artist={selectedArtist} onBack={handleBackFromForm} onConfirmBooking={handleConfirmBooking} />
       ) : (
         <>
           <div className="p-4 sticky top-[138px] z-10 bg-nailora-pink-light">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Page, BookingDetails, Design, User } from './types';
+import { Page, BookingDetails, Design, User, Artist } from './types';
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
@@ -17,6 +17,7 @@ import BookingHistoryScreen from './screens/BookingHistoryScreen';
 import CompleteProfileScreen from './screens/CompleteProfileScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import PartnerRegistrationScreen from './screens/PartnerRegistrationScreen';
+import SearchScreen from './screens/SearchScreen';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Splash);
@@ -25,19 +26,28 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [artistToBook, setArtistToBook] = useState<Artist | null>(null);
 
   useEffect(() => {
     // Simulate checking auth status
     const checkAuth = () => {
       try {
-        const userJson = localStorage.getItem('nailora_currentUser');
+        // Prioritize localStorage for persistent sessions
+        let userJson = localStorage.getItem('nailora_currentUser');
+        if (!userJson) {
+          // Fallback to sessionStorage for non-persistent sessions
+          userJson = sessionStorage.getItem('nailora_currentUser');
+        }
+
         if (userJson) {
           const user = JSON.parse(userJson);
           setCurrentUser(user);
         }
       } catch (error) {
-        console.error("Failed to parse user from localStorage", error);
+        console.error("Failed to parse user from storage", error);
         localStorage.removeItem('nailora_currentUser');
+        sessionStorage.removeItem('nailora_currentUser');
       }
       setIsLoading(false);
     };
@@ -82,13 +92,14 @@ const App: React.FC = () => {
     
     users.push(userWithId);
     localStorage.setItem('nailora_users', JSON.stringify(users));
+    // Automatically log in and remember the new user
     localStorage.setItem('nailora_currentUser', JSON.stringify(userWithId));
     setCurrentUser(userWithId);
     navigate(Page.CompleteProfile);
     return { success: true, message: 'Registrasi berhasil!' };
   };
 
-  const handleLogin = (credentials: Pick<User, 'email' | 'password'>): { success: boolean, message: string } => {
+  const handleLogin = (credentials: Pick<User, 'email' | 'password'>, rememberMe: boolean): { success: boolean, message: string } => {
     const usersJson = localStorage.getItem('nailora_users');
     const users = usersJson ? JSON.parse(usersJson) : [];
 
@@ -97,7 +108,13 @@ const App: React.FC = () => {
       return { success: false, message: 'Email atau password salah.' };
     }
     
-    localStorage.setItem('nailora_currentUser', JSON.stringify(user));
+    // Use localStorage for "Remember Me", otherwise use sessionStorage
+    if (rememberMe) {
+      localStorage.setItem('nailora_currentUser', JSON.stringify(user));
+    } else {
+      sessionStorage.setItem('nailora_currentUser', JSON.stringify(user));
+    }
+    
     setCurrentUser(user);
     
     if (user.profileComplete) {
@@ -114,7 +131,13 @@ const App: React.FC = () => {
 
     const updatedCurrentUser = { ...currentUser, name: updatedUser.name, profileComplete: true };
     setCurrentUser(updatedCurrentUser);
-    localStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
+    
+    // Update the correct storage
+    if (localStorage.getItem('nailora_currentUser')) {
+      localStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
+    } else if (sessionStorage.getItem('nailora_currentUser')) {
+      sessionStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
+    }
 
     // Update user in the main user list
     const usersJson = localStorage.getItem('nailora_users');
@@ -130,7 +153,13 @@ const App: React.FC = () => {
 
     const updatedCurrentUser = { ...currentUser, ...updatedData };
     setCurrentUser(updatedCurrentUser);
-    localStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
+
+    // Update the correct storage
+    if (localStorage.getItem('nailora_currentUser')) {
+      localStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
+    } else if (sessionStorage.getItem('nailora_currentUser')) {
+      sessionStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
+    }
 
     // Update user in the main user list as well
     const usersJson = localStorage.getItem('nailora_users');
@@ -143,6 +172,7 @@ const App: React.FC = () => {
   
   const handleLogout = () => {
     localStorage.removeItem('nailora_currentUser');
+    sessionStorage.removeItem('nailora_currentUser'); // Also clear session storage
     setCurrentUser(null);
     navigate(Page.Login);
   };
@@ -150,6 +180,16 @@ const App: React.FC = () => {
   const handleSelectDesign = (design: Design) => {
     setSelectedDesign(design);
     navigate(Page.DesignDetail);
+  };
+  
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    navigate(Page.Search);
+  };
+
+  const handleSelectArtist = (artist: Artist) => {
+    setArtistToBook(artist);
+    navigate(Page.Booking);
   };
 
   const navigate = (page: Page) => {
@@ -186,11 +226,11 @@ const App: React.FC = () => {
     // User is logged in and profile is complete
     switch (currentPage) {
       case Page.Dashboard:
-        return <DashboardScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} />;
+        return <DashboardScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} onSearch={handleSearch} />;
       case Page.Catalog:
         return <CatalogScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} />;
       case Page.Booking:
-        return <BookingScreen setCurrentPage={navigate} setBookingDetails={setBookingDetails} />;
+        return <BookingScreen setCurrentPage={navigate} setBookingDetails={setBookingDetails} initialArtist={artistToBook} onClearInitialArtist={() => setArtistToBook(null)} />;
       case Page.Profile:
         return <ProfileScreen user={currentUser} setCurrentPage={navigate} onLogout={handleLogout} />;
       case Page.EditProfile:
@@ -205,6 +245,8 @@ const App: React.FC = () => {
         return <BookingHistoryScreen setCurrentPage={navigate} />;
       case Page.PartnerRegistration:
         return <PartnerRegistrationScreen setCurrentPage={navigate} />;
+       case Page.Search:
+        return <SearchScreen query={searchQuery} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} onSelectArtist={handleSelectArtist} onBack={() => navigate(Page.Dashboard)} />;
       case Page.DesignDetail:
         if (!selectedDesign) {
             return <CatalogScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} />;
@@ -212,12 +254,12 @@ const App: React.FC = () => {
         return <DesignDetailScreen design={selectedDesign} setCurrentPage={navigate} />;
       case Page.Payment:
         if (!bookingDetails) {
-            return <BookingScreen setCurrentPage={navigate} setBookingDetails={setBookingDetails} />;
+            return <BookingScreen setCurrentPage={navigate} setBookingDetails={setBookingDetails} onClearInitialArtist={() => setArtistToBook(null)} />;
         }
         return <PaymentScreen setCurrentPage={navigate} bookingDetails={bookingDetails} />;
       default:
         // Fallback for any other page when profile is complete is Dashboard
-        return <DashboardScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} />;
+        return <DashboardScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} onSearch={handleSearch} />;
     }
   };
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Page, User } from '../types';
 import BottomNavBar from '../components/BottomNavBar';
-// FIX: Import InstagramIcon and TikTokIcon
 import { ChevronRightIcon, PencilIcon, InstagramIcon, TikTokIcon } from '../components/icons';
 
 interface ProfileScreenProps {

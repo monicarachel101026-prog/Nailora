@@ -102,6 +102,14 @@ const PartnerRegistrationScreen: React.FC<PartnerRegistrationScreenProps> = ({ s
     const nextStep = () => setStep(prev => prev + 1);
     const prevStep = () => setStep(prev => prev - 1);
 
+    const handleBackClick = () => {
+        if (step > 1) {
+            prevStep();
+        } else {
+            setCurrentPage(Page.Dashboard);
+        }
+    };
+
     const handleSubmit = () => {
         // Here you would normally send the data to a server
         console.log("Form submitted:", formData);
@@ -111,7 +119,7 @@ const PartnerRegistrationScreen: React.FC<PartnerRegistrationScreenProps> = ({ s
     return (
         <div className="bg-gray-50 min-h-full">
             <div className="p-4 sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10 border-b border-gray-100 flex items-center">
-                <button onClick={() => setCurrentPage(Page.Dashboard)} className="p-2">
+                <button onClick={handleBackClick} className="p-2">
                     <ChevronLeftIcon className="w-6 h-6 text-nailora-purple"/>
                 </button>
                 <h2 className="text-xl font-bold text-center text-nailora-purple flex-grow -ml-8">Daftar Jadi Partner</h2>
