@@ -97,7 +97,7 @@ const CatalogItem: React.FC<CatalogItemProps> = ({ design, onPress, isFavorite, 
 };
 
 const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onSelectDesign, selectedCategory, setSelectedCategory }) => {
-  const categories = ['Semua', 'Nude', 'Putih', 'Abu-abu', 'Hitam', 'Merah', 'Pink', 'Kuning', 'Oranye', 'Biru', 'Hijau', 'Ungu', 'Biru Tua', 'Cokelat', 'Emas', 'Perak', 'Rose Gold', 'Glitter & Efek'];
+  const categories = ['Semua', 'Nude', 'Putih', 'Abu-abu', 'Hitam', 'Merah', 'Pink', 'Kuning', 'Oranye', 'Biru', 'Hijau', 'Ungu', 'Cokelat', 'Emas'];
   
   const [designs, setDesigns] = useState<Design[]>(() => {
     const savedDesigns = localStorage.getItem('nailora_designs');
