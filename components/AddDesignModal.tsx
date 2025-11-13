@@ -6,12 +6,14 @@ interface AddDesignModalProps {
     onClose: () => void;
     onAddDesign: (newDesign: Design) => void;
     categories: string[];
+    initialCategory?: string;
 }
 
-const AddDesignModal: React.FC<AddDesignModalProps> = ({ onClose, onAddDesign, categories }) => {
+const AddDesignModal: React.FC<AddDesignModalProps> = ({ onClose, onAddDesign, categories, initialCategory }) => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [title, setTitle] = useState('');
-    const [category, setCategory] = useState(categories.find(c => c !== 'Semua') || 'Nude');
+    const availableCategories = categories.filter(c => c !== 'Semua');
+    const [category, setCategory] = useState(initialCategory || availableCategories[0] || 'Nude');
     const [artist, setArtist] = useState('');
     const [description, setDescription] = useState('');
     const [isPremium, setIsPremium] = useState(false);
@@ -44,8 +46,6 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ onClose, onAddDesign, c
         };
         onAddDesign(newDesign);
     };
-
-    const availableCategories = categories.filter(c => c !== 'Semua');
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center animate-fade-in" onClick={onClose}>
@@ -83,7 +83,7 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ onClose, onAddDesign, c
                     </div>
                     
                     <div>
-                        <label className="text-sm font-medium text-nailora-purple">Kategori</label>
+                        <label className="text-sm font-medium text-nailora-purple">Kategori Warna</label>
                         <select
                             value={category}
                             onChange={e => setCategory(e.target.value)}

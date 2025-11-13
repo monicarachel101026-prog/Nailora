@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Page, BookingDetails, Design, User, Artist } from './types';
 import SplashScreen from './screens/SplashScreen';
@@ -21,6 +22,7 @@ import SearchScreen from './screens/SearchScreen';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Splash);
+  const [history, setHistory] = useState<Page[]>([Page.Splash]);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -28,15 +30,51 @@ const App: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [artistToBook, setArtistToBook] = useState<Artist | null>(null);
+  const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<string | null>(null);
+
+
+  const navigate = (page: Page, options?: { history: 'push' | 'reset' }) => {
+    const { history: historyAction = 'push' } = options || {};
+
+    if (page === currentPage && historyAction !== 'reset') return;
+
+    if (page === Page.Catalog && currentPage !== Page.DesignDetail) {
+      setSelectedCatalogCategory(null);
+    }
+    
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentPage(page);
+      if (historyAction === 'reset') {
+        setHistory([page]);
+      } else { // push
+        setHistory(prev => [...prev, page]);
+      }
+      setIsTransitioning(false);
+    }, 250);
+  };
+
+  const goBack = () => {
+    if (history.length <= 1) return;
+
+    const newHistory = [...history];
+    newHistory.pop(); // Remove current page
+    const prevPage = newHistory[newHistory.length - 1];
+
+    setIsTransitioning(true);
+    setTimeout(() => {
+        setCurrentPage(prevPage);
+        setHistory(newHistory);
+        setIsTransitioning(false);
+    }, 250);
+  };
 
   useEffect(() => {
     // Simulate checking auth status
     const checkAuth = () => {
       try {
-        // Prioritize localStorage for persistent sessions
         let userJson = localStorage.getItem('nailora_currentUser');
         if (!userJson) {
-          // Fallback to sessionStorage for non-persistent sessions
           userJson = sessionStorage.getItem('nailora_currentUser');
         }
 
@@ -52,7 +90,7 @@ const App: React.FC = () => {
       setIsLoading(false);
     };
 
-    const timer = setTimeout(checkAuth, 1500); // Simulate network delay
+    const timer = setTimeout(checkAuth, 1500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -62,12 +100,12 @@ const App: React.FC = () => {
         const splashTimer = setTimeout(() => {
           if (currentUser) {
             if (currentUser.profileComplete) {
-              navigate(Page.Dashboard);
+              navigate(Page.Dashboard, { history: 'reset' });
             } else {
-              navigate(Page.CompleteProfile);
+              navigate(Page.CompleteProfile, { history: 'reset' });
             }
           } else {
-            navigate(Page.Login);
+            navigate(Page.Login, { history: 'reset' });
           }
         }, 3000);
         return () => clearTimeout(splashTimer);
@@ -92,10 +130,9 @@ const App: React.FC = () => {
     
     users.push(userWithId);
     localStorage.setItem('nailora_users', JSON.stringify(users));
-    // Automatically log in and remember the new user
     localStorage.setItem('nailora_currentUser', JSON.stringify(userWithId));
     setCurrentUser(userWithId);
-    navigate(Page.CompleteProfile);
+    navigate(Page.CompleteProfile, { history: 'reset' });
     return { success: true, message: 'Registrasi berhasil!' };
   };
 
@@ -108,7 +145,6 @@ const App: React.FC = () => {
       return { success: false, message: 'Email atau password salah.' };
     }
     
-    // Use localStorage for "Remember Me", otherwise use sessionStorage
     if (rememberMe) {
       localStorage.setItem('nailora_currentUser', JSON.stringify(user));
     } else {
@@ -118,13 +154,12 @@ const App: React.FC = () => {
     setCurrentUser(user);
     
     if (user.profileComplete) {
-      navigate(Page.Dashboard);
+      navigate(Page.Dashboard, { history: 'reset' });
     } else {
-      navigate(Page.CompleteProfile);
+      navigate(Page.CompleteProfile, { history: 'reset' });
     }
     return { success: true, message: 'Login berhasil!' };
   };
-
 
   const handleProfileComplete = (updatedUser: Pick<User, 'name'>) => {
     if (!currentUser) return;
@@ -132,20 +167,18 @@ const App: React.FC = () => {
     const updatedCurrentUser = { ...currentUser, name: updatedUser.name, profileComplete: true };
     setCurrentUser(updatedCurrentUser);
     
-    // Update the correct storage
     if (localStorage.getItem('nailora_currentUser')) {
       localStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
     } else if (sessionStorage.getItem('nailora_currentUser')) {
       sessionStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
     }
 
-    // Update user in the main user list
     const usersJson = localStorage.getItem('nailora_users');
     let users = usersJson ? JSON.parse(usersJson) : [];
     users = users.map((u: User) => u.id === currentUser.id ? updatedCurrentUser : u);
     localStorage.setItem('nailora_users', JSON.stringify(users));
 
-    navigate(Page.Dashboard);
+    navigate(Page.Dashboard, { history: 'reset' });
   };
 
   const handleUpdateProfile = (updatedData: Pick<User, 'name' | 'avatar'>) => {
@@ -154,27 +187,25 @@ const App: React.FC = () => {
     const updatedCurrentUser = { ...currentUser, ...updatedData };
     setCurrentUser(updatedCurrentUser);
 
-    // Update the correct storage
     if (localStorage.getItem('nailora_currentUser')) {
       localStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
     } else if (sessionStorage.getItem('nailora_currentUser')) {
       sessionStorage.setItem('nailora_currentUser', JSON.stringify(updatedCurrentUser));
     }
 
-    // Update user in the main user list as well
     const usersJson = localStorage.getItem('nailora_users');
     let users = usersJson ? JSON.parse(usersJson) : [];
     users = users.map((u: User) => u.id === currentUser.id ? updatedCurrentUser : u);
     localStorage.setItem('nailora_users', JSON.stringify(users));
 
-    navigate(Page.Profile);
+    goBack();
   };
   
   const handleLogout = () => {
     localStorage.removeItem('nailora_currentUser');
-    sessionStorage.removeItem('nailora_currentUser'); // Also clear session storage
+    sessionStorage.removeItem('nailora_currentUser');
     setCurrentUser(null);
-    navigate(Page.Login);
+    navigate(Page.Login, { history: 'reset' });
   };
 
   const handleSelectDesign = (design: Design) => {
@@ -190,15 +221,6 @@ const App: React.FC = () => {
   const handleSelectArtist = (artist: Artist) => {
     setArtistToBook(artist);
     navigate(Page.Booking);
-  };
-
-  const navigate = (page: Page) => {
-    if (page === currentPage) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentPage(page);
-      setIsTransitioning(false);
-    }, 250); // Animation duration
   };
 
   const renderPage = () => {
@@ -218,25 +240,23 @@ const App: React.FC = () => {
         }
     }
 
-    // User is logged in, but profile is not complete
     if (!currentUser.profileComplete) {
         return <CompleteProfileScreen user={currentUser} onComplete={handleProfileComplete} onBack={handleLogout} />;
     }
 
-    // User is logged in and profile is complete
     switch (currentPage) {
       case Page.Dashboard:
         return <DashboardScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} onSearch={handleSearch} />;
       case Page.Catalog:
-        return <CatalogScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} />;
+        return <CatalogScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} />;
       case Page.Booking:
         return <BookingScreen setCurrentPage={navigate} setBookingDetails={setBookingDetails} initialArtist={artistToBook} onClearInitialArtist={() => setArtistToBook(null)} />;
       case Page.Profile:
         return <ProfileScreen user={currentUser} setCurrentPage={navigate} onLogout={handleLogout} />;
       case Page.EditProfile:
-        return <EditProfileScreen user={currentUser} onUpdateProfile={handleUpdateProfile} onBack={() => navigate(Page.Profile)} />;
+        return <EditProfileScreen user={currentUser} onUpdateProfile={handleUpdateProfile} onBack={goBack} />;
       case Page.Premium:
-        return <PremiumScreen setCurrentPage={navigate} />;
+        return <PremiumScreen setCurrentPage={navigate} onBack={goBack} />;
       case Page.Community:
         return <CommunityScreen user={currentUser} setCurrentPage={navigate} />;
       case Page.About:
@@ -249,7 +269,7 @@ const App: React.FC = () => {
         return <SearchScreen query={searchQuery} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} onSelectArtist={handleSelectArtist} onBack={() => navigate(Page.Dashboard)} />;
       case Page.DesignDetail:
         if (!selectedDesign) {
-            return <CatalogScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} />;
+            return <CatalogScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} />;
         }
         return <DesignDetailScreen design={selectedDesign} setCurrentPage={navigate} />;
       case Page.Payment:
@@ -258,7 +278,6 @@ const App: React.FC = () => {
         }
         return <PaymentScreen setCurrentPage={navigate} bookingDetails={bookingDetails} />;
       default:
-        // Fallback for any other page when profile is complete is Dashboard
         return <DashboardScreen user={currentUser} setCurrentPage={navigate} onSelectDesign={handleSelectDesign} onSearch={handleSearch} />;
     }
   };

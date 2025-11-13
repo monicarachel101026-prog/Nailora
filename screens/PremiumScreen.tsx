@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Page } from '../types';
 import BottomNavBar from '../components/BottomNavBar';
@@ -5,6 +6,7 @@ import { ChevronLeftIcon, StarIcon, CheckCircleIcon } from '../components/icons'
 
 interface PremiumScreenProps {
   setCurrentPage: (page: Page) => void;
+  onBack: () => void;
 }
 
 interface PremiumCardProps {
@@ -28,7 +30,7 @@ const PremiumCard: React.FC<PremiumCardProps> = ({ imgSrc, title, artist }) => (
     </div>
 );
 
-const PremiumScreen: React.FC<PremiumScreenProps> = ({ setCurrentPage }) => {
+const PremiumScreen: React.FC<PremiumScreenProps> = ({ setCurrentPage, onBack }) => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const premiumDesigns = [
@@ -75,7 +77,7 @@ const PremiumScreen: React.FC<PremiumScreenProps> = ({ setCurrentPage }) => {
         <div className="bg-gray-900 text-white min-h-full pb-24">
             {showSuccessModal && <SuccessModal />}
             <div className="bg-gradient-to-b from-purple-500 to-pink-500 p-6 rounded-b-3xl relative">
-                <button onClick={() => window.history.back()} className="absolute top-6 left-4 p-2">
+                <button onClick={onBack} className="absolute top-6 left-4 p-2">
                   <ChevronLeftIcon className="w-6 h-6"/>
                 </button>
                 <div className="text-center pt-2">

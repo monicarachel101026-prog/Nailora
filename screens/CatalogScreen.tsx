@@ -1,34 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Page, Design, User } from '../types';
 import BottomNavBar from '../components/BottomNavBar';
-import { SearchIcon, HeartIcon, StarIcon, UploadIcon, TrashIcon } from '../components/icons';
+import { HeartIcon, StarIcon, UploadIcon, TrashIcon, ChevronLeftIcon } from '../components/icons';
 import AddDesignModal from '../components/AddDesignModal';
+import ColorCategoryFolder from '../components/ColorCategoryFolder';
 import { initialDesigns } from '../data/designs';
 
 interface CatalogScreenProps {
   user: User;
   setCurrentPage: (page: Page) => void;
   onSelectDesign: (design: Design) => void;
+  selectedCategory: string | null;
+  setSelectedCategory: (category: string | null) => void;
 }
-
-interface CategoryChipProps {
-  name: string;
-  active?: boolean;
-  onClick: () => void;
-}
-
-const CategoryChip: React.FC<CategoryChipProps> = ({ name, active, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 shadow-sm ${
-      active
-        ? 'bg-nailora-pink-accent text-white shadow-md'
-        : 'bg-white text-nailora-gray'
-    }`}
-  >
-    {name}
-  </button>
-);
 
 interface CatalogItemProps {
   design: Design;
@@ -112,8 +96,7 @@ const CatalogItem: React.FC<CatalogItemProps> = ({ design, onPress, isFavorite, 
     );
 };
 
-const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onSelectDesign }) => {
-  const [activeCategory, setActiveCategory] = useState('Semua');
+const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onSelectDesign, selectedCategory, setSelectedCategory }) => {
   const categories = ['Semua', 'Nude', 'Putih', 'Abu-abu', 'Hitam', 'Merah', 'Pink', 'Kuning', 'Oranye', 'Biru', 'Hijau', 'Ungu', 'Biru Tua', 'Cokelat', 'Emas', 'Perak', 'Rose Gold', 'Glitter & Efek'];
   
   const [designs, setDesigns] = useState<Design[]>(() => {
@@ -128,14 +111,12 @@ const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onS
     } catch (error) {
         console.error("Gagal memuat desain dari penyimpanan lokal", error);
     }
-    // If nothing in local storage, initialize with default data
     localStorage.setItem('nailora_designs', JSON.stringify(initialDesigns));
     return initialDesigns;
   });
 
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newDesignsCount, setNewDesignsCount] = useState(0);
 
   useEffect(() => {
     const savedFavorites = localStorage.getItem('nailora_favorites');
@@ -144,20 +125,6 @@ const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onS
     }
   }, []);
   
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const lastSeenCount = parseInt(localStorage.getItem('nailora_lastSeenDesignCount') || '0', 10);
-      const currentCount = designs.length;
-
-      if (currentCount > lastSeenCount) {
-        setNewDesignsCount(currentCount - lastSeenCount);
-        localStorage.setItem('nailora_lastSeenDesignCount', String(currentCount));
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [designs.length]);
-
   const handleAddDesign = (newDesign: Design) => {
     const newDesigns = [newDesign, ...designs];
     setDesigns(newDesigns);
@@ -185,8 +152,6 @@ const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onS
     const newDesigns = designs.filter(d => d.title !== title);
     setDesigns(newDesigns);
     localStorage.setItem('nailora_designs', JSON.stringify(newDesigns));
-
-    // Also remove from favorites if it exists there
     if (favorites.includes(title)) {
       const newFavorites = favorites.filter(t => t !== title);
       setFavorites(newFavorites);
@@ -194,80 +159,92 @@ const CatalogScreen: React.FC<CatalogScreenProps> = ({ user, setCurrentPage, onS
     }
   };
 
-  const filteredDesigns = activeCategory === 'Semua'
-    ? designs
-    : designs.filter(design => design.category === activeCategory);
+  const designsByCategory = useMemo(() => {
+    return designs.reduce((acc, design) => {
+        const category = design.category || 'Lainnya';
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(design);
+        return acc;
+    }, {} as Record<string, Design[]>);
+  }, [designs]);
 
+  // Tampilan untuk kategori warna tertentu
+  if (selectedCategory) {
+    const filteredDesigns = designsByCategory[selectedCategory] || [];
+    return (
+      <div className="bg-gray-50 min-h-full pb-24">
+        {isAddModalOpen && <AddDesignModal onClose={() => setIsAddModalOpen(false)} onAddDesign={handleAddDesign} categories={categories} initialCategory={selectedCategory} />}
+        
+        <div className="p-4 sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10 border-b border-gray-100 flex items-center">
+            <button onClick={() => setSelectedCategory(null)} className="p-2">
+                <ChevronLeftIcon className="w-6 h-6 text-nailora-purple"/>
+            </button>
+            <h2 className="text-xl font-bold text-center text-nailora-purple flex-grow -ml-8">{selectedCategory}</h2>
+        </div>
+        
+        <p className="text-sm text-nailora-gray px-4 pt-4 pb-2">{filteredDesigns.length} desain ditemukan</p>
 
+        <div className="px-4 pt-2">
+             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {filteredDesigns.length > 0 ? (
+                    filteredDesigns.map(design => (
+                        <CatalogItem 
+                            key={design.title} 
+                            design={design} 
+                            onPress={handleItemClick}
+                            isFavorite={favorites.includes(design.title)}
+                            onToggleFavorite={toggleFavorite}
+                            onDelete={handleDeleteDesign}
+                        />
+                    ))
+                ) : (
+                    <div className="col-span-full text-center py-10">
+                        <p className="text-nailora-gray">Belum ada desain untuk kategori ini.</p>
+                        <p className="text-sm mt-1">Jadilah yang pertama mengunggah!</p>
+                    </div>
+                )}
+             </div>
+        </div>
+
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="fixed bottom-24 right-6 bg-nailora-pink-accent text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform transform hover:scale-110 active:scale-95 z-20"
+          aria-label={`Tambah Desain ${selectedCategory}`}
+        >
+          <UploadIcon className="w-7 h-7" />
+        </button>
+
+        <BottomNavBar activePage={Page.Catalog} setCurrentPage={setCurrentPage} />
+      </div>
+    );
+  }
+
+  // Tampilan utama untuk semua kategori warna (folder)
   return (
     <div className="bg-gray-50 min-h-full pb-24">
-      {isAddModalOpen && <AddDesignModal onClose={() => setIsAddModalOpen(false)} onAddDesign={handleAddDesign} categories={categories} />}
-
-      <div className="p-4 sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-center text-nailora-purple">Katalog Desain</h2>
-        <div className="relative mt-4">
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Cari desain atau artis..."
-            className="w-full bg-white pl-12 pr-4 py-3 rounded-full text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-nailora-pink-accent"
-          />
+        <div className="p-4 sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10 border-b border-gray-100">
+            <h2 className="text-xl font-bold text-center text-nailora-purple">Katalog Warna</h2>
         </div>
-      </div>
-      
-      <div className="py-3 sticky top-[120px] bg-gray-50/80 backdrop-blur-sm z-10">
-        <div className="flex gap-2 overflow-x-auto px-4 pb-2">
-            {categories.map((cat) => (
-              <CategoryChip 
-                key={cat} 
-                name={cat} 
-                active={cat === activeCategory} 
-                onClick={() => setActiveCategory(cat)} 
-              />
-            ))}
-        </div>
-      </div>
 
-      <div className="p-4">
-         {newDesignsCount > 0 && (
-            <div className="bg-gradient-to-r from-blue-400 to-teal-400 text-white p-4 rounded-xl shadow-lg flex justify-between items-center mb-4 transition-opacity duration-500">
-                <div>
-                    <p className="font-bold">✨ Desain Baru Ditemukan!</p>
-                    <p className="text-sm opacity-90">Ada {newDesignsCount} inspirasi baru menantimu di katalog.</p>
-                </div>
-                <button onClick={() => setNewDesignsCount(0)} className="font-bold text-lg leading-none p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors">&times;</button>
-            </div>
-        )}
-         <p className="text-sm text-nailora-gray mb-4">{filteredDesigns.length} desain ditemukan</p>
-         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {filteredDesigns.length > 0 ? (
-                filteredDesigns.map(design => (
-                    <CatalogItem 
-                        key={design.title} 
-                        design={design} 
-                        onPress={handleItemClick}
-                        isFavorite={favorites.includes(design.title)}
-                        onToggleFavorite={toggleFavorite}
-                        onDelete={handleDeleteDesign}
+        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {categories.filter(c => c !== 'Semua').map(category => {
+                const categoryDesigns = designsByCategory[category] || [];
+                if (categoryDesigns.length === 0) return null; // Jangan tampilkan folder jika kosong
+                return (
+                    <ColorCategoryFolder 
+                        key={category}
+                        categoryName={category}
+                        designCount={categoryDesigns.length}
+                        previewImage={categoryDesigns[0].imgSrc}
+                        onClick={() => setSelectedCategory(category)}
                     />
-                ))
-            ) : (
-                <div className="col-span-full text-center py-10">
-                    <p className="text-nailora-gray">Tidak ada desain untuk kategori ini.</p>
-                </div>
-            )}
-         </div>
-      </div>
+                );
+            })}
+        </div>
 
-      <button
-        onClick={() => setIsAddModalOpen(true)}
-        className="fixed bottom-24 right-6 bg-nailora-pink-accent text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform transform hover:scale-110 active:scale-95 z-20"
-        aria-label="Tambah Desain Baru"
-      >
-        <UploadIcon className="w-7 h-7" />
-      </button>
-
-      <BottomNavBar activePage={Page.Catalog} setCurrentPage={setCurrentPage} />
+        <BottomNavBar activePage={Page.Catalog} setCurrentPage={setCurrentPage} />
     </div>
   );
 };
