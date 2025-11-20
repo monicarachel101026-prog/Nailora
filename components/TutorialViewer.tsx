@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
-import { Tutorial, Comment, User } from '../types';
-import { HeartIcon, ChatBubbleOvalLeftIcon, PaperAirplaneIcon } from './icons';
+import { Tutorial, User } from '../types';
+import { HeartIcon, ShareIcon, CheckCircleIcon } from './icons';
 
 interface TutorialViewerProps {
     user: User;
@@ -11,7 +12,6 @@ interface TutorialViewerProps {
 
 const TutorialViewer: React.FC<TutorialViewerProps> = ({ user, tutorial, onClose, onUpdateTutorial }) => {
     const [isLiked, setIsLiked] = useState(false);
-    const [commentText, setCommentText] = useState('');
 
     const handleLike = () => {
         const newLikeCount = isLiked ? tutorial.likes - 1 : tutorial.likes + 1;
@@ -19,82 +19,110 @@ const TutorialViewer: React.FC<TutorialViewerProps> = ({ user, tutorial, onClose
         onUpdateTutorial({ ...tutorial, likes: newLikeCount });
     };
 
-    const handleAddComment = () => {
-        if (!commentText.trim()) return;
-
-        const newComment: Comment = {
-            id: Date.now(),
-            userName: user.name,
-            userAvatar: user.avatar,
-            text: commentText,
-            timestamp: 'Baru saja',
-        };
-
-        onUpdateTutorial({ ...tutorial, comments: [...tutorial.comments, newComment] });
-        setCommentText('');
-    };
-
     return (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center animate-fade-in" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md h-[90vh] mx-4 flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                <div className="relative">
-                    <video className="w-full aspect-video bg-black" src={tutorial.videoUrl} controls autoPlay playsInline />
-                    <button onClick={onClose} className="absolute top-2 right-2 bg-black/30 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold hover:bg-black/50 transition-colors">&times;</button>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center animate-fade-in" onClick={onClose}>
+            <div 
+                className="bg-white w-full max-w-md h-[90vh] sm:h-[85vh] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col overflow-hidden"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+                    <div>
+                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 inline-block ${
+                            tutorial.difficulty === 'Pemula' ? 'bg-green-100 text-green-700' : 
+                            tutorial.difficulty === 'Menengah' ? 'bg-yellow-100 text-yellow-700' : 
+                            'bg-red-100 text-red-700'
+                        }`}>
+                            {tutorial.category}
+                        </span>
+                        <p className="text-xs text-nailora-gray">Oleh {tutorial.uploaderName}</p>
+                    </div>
+                    <button onClick={onClose} className="w-8 h-8 bg-gray-200 rounded-full text-gray-600 hover:bg-gray-300 font-bold flex items-center justify-center">
+                        &times;
+                    </button>
                 </div>
 
-                <div className="p-4 border-b border-gray-200">
-                    <h3 className="font-bold text-lg text-nailora-purple">{tutorial.title}</h3>
-                    <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center gap-2">
-                            <img src={tutorial.uploaderAvatar} alt={tutorial.uploaderName} className="w-8 h-8 rounded-full" />
-                            <span className="text-sm font-semibold text-nailora-gray">{tutorial.uploaderName}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5 text-nailora-gray">
-                                <ChatBubbleOvalLeftIcon className="w-5 h-5" />
-                                <span className="text-sm font-semibold">{tutorial.comments.length}</span>
+                {/* Content Scrollable Area */}
+                <div className="flex-grow overflow-y-auto p-6">
+                    {/* Title & Desc */}
+                    <h1 className="text-2xl font-bold text-nailora-purple font-quicksand mb-2">{tutorial.title}</h1>
+                    <p className="text-sm text-nailora-gray italic mb-6 border-l-4 border-nailora-pink-accent pl-3 bg-gray-50 py-2 rounded-r-lg">
+                        "{tutorial.description}"
+                    </p>
+
+                    {/* Tools List */}
+                    {tutorial.tools && tutorial.tools.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-sm font-bold text-nailora-purple uppercase tracking-wider mb-3">🛠️ Alat yang dibutuhkan</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {tutorial.tools.map((tool, idx) => (
+                                    <span key={idx} className="bg-pink-50 text-nailora-purple text-xs font-medium px-3 py-1.5 rounded-lg border border-pink-100">
+                                        {tool}
+                                    </span>
+                                ))}
                             </div>
-                             <button onClick={handleLike} className="flex items-center gap-1.5 text-nailora-gray">
-                                <HeartIcon className={`w-5 h-5 transition-colors ${isLiked ? 'text-red-500' : 'text-gray-400'}`} />
-                                <span className="text-sm font-semibold">{tutorial.likes}</span>
-                            </button>
+                        </div>
+                    )}
+
+                    {/* Steps */}
+                    <div className="mb-8">
+                        <h3 className="text-sm font-bold text-nailora-purple uppercase tracking-wider mb-4">📝 Langkah-Langkah</h3>
+                        <div className="space-y-6">
+                            {tutorial.steps.map((step, idx) => (
+                                <div key={idx} className="flex gap-4 relative">
+                                    {/* Timeline Line */}
+                                    {idx !== tutorial.steps.length - 1 && (
+                                        <div className="absolute left-[15px] top-8 bottom-[-24px] w-0.5 bg-gray-200"></div>
+                                    )}
+                                    
+                                    {/* Number Badge */}
+                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-nailora-pink-accent text-white flex items-center justify-center font-bold text-sm shadow-md z-10">
+                                        {idx + 1}
+                                    </div>
+                                    
+                                    {/* Text Content */}
+                                    <div>
+                                        <h4 className="font-bold text-nailora-purple text-base mb-1">{step.title}</h4>
+                                        <p className="text-sm text-nailora-gray leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                            {step.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </div>
 
-                <div className="flex-grow overflow-y-auto p-4 space-y-4">
-                    {tutorial.comments.length > 0 ? (
-                        tutorial.comments.map(comment => (
-                            <div key={comment.id} className="flex items-start gap-3">
-                                <img src={comment.userAvatar} alt={comment.userName} className="w-8 h-8 rounded-full" />
-                                <div className="bg-gray-100 rounded-lg p-2 flex-grow">
-                                    <p className="font-semibold text-nailora-purple text-sm">{comment.userName}</p>
-                                    <p className="text-sm text-nailora-gray">{comment.text}</p>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                         <div className="text-center py-8 text-nailora-gray">
-                             <p>Belum ada komentar.</p>
-                             <p className="text-sm">Jadilah yang pertama berkomentar!</p>
-                         </div>
+                    {/* Important Notes */}
+                    {tutorial.notes && tutorial.notes.length > 0 && (
+                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                            <h3 className="text-sm font-bold text-yellow-800 flex items-center gap-2 mb-2">
+                                <span>⚠️</span> Catatan Penting
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1">
+                                {tutorial.notes.map((note, idx) => (
+                                    <li key={idx} className="text-sm text-yellow-900/80">{note}</li>
+                                ))}
+                            </ul>
+                        </div>
                     )}
                 </div>
 
-                <div className="p-3 border-t border-gray-200 bg-white">
-                    <div className="relative">
-                        <input 
-                            type="text" 
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
-                            placeholder="Tambahkan komentar..." 
-                            className="w-full bg-gray-100 rounded-full pl-4 pr-12 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-nailora-pink-accent"
-                        />
-                        <button onClick={handleAddComment} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-nailora-pink-accent hover:bg-pink-100 rounded-full disabled:text-gray-400" disabled={!commentText.trim()}>
-                            <PaperAirplaneIcon className="w-5 h-5" />
-                        </button>
-                    </div>
+                {/* Footer Actions */}
+                <div className="p-4 border-t border-gray-100 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex items-center gap-3">
+                    <button 
+                        onClick={handleLike}
+                        className={`p-3 rounded-xl border flex items-center gap-2 transition-colors ${isLiked ? 'border-red-200 bg-red-50 text-red-500' : 'border-gray-200 text-nailora-gray hover:bg-gray-50'}`}
+                    >
+                        <HeartIcon className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                        <span className="text-xs font-bold">{tutorial.likes}</span>
+                    </button>
+                    <button 
+                        onClick={() => alert("Disimpan ke Favorit!")}
+                        className="flex-grow bg-nailora-pink-accent text-white font-bold py-3 rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center gap-2 text-sm"
+                    >
+                        <CheckCircleIcon className="w-5 h-5" />
+                        <span>Tandai Selesai</span>
+                    </button>
                 </div>
             </div>
         </div>

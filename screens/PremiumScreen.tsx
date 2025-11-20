@@ -1,108 +1,100 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Page } from '../types';
-import BottomNavBar from '../components/BottomNavBar';
-import { ChevronLeftIcon, StarIcon, CheckCircleIcon } from '../components/icons';
+import { ChevronLeftIcon, CrownIcon, CheckCircleIcon, SparklesIcon, UploadIcon, TrashIcon } from '../components/icons';
 
 interface PremiumScreenProps {
   setCurrentPage: (page: Page) => void;
-  onBack: () => void;
+  onSubscribeClick: () => void;
+  onTrialClick: () => void;
 }
 
-interface PremiumCardProps {
-    imgSrc: string;
-    title: string;
-    artist: string;
-}
-
-const PremiumCard: React.FC<PremiumCardProps> = ({ imgSrc, title, artist }) => (
-    <div className="relative rounded-2xl overflow-hidden group shadow-lg">
-        <img src={imgSrc} alt={title} className="w-full h-full object-cover aspect-[4/5] transition-transform duration-300 group-hover:scale-110" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        <div className="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-            <StarIcon className="w-3 h-3" />
-            <span>PLUS</span>
-        </div>
-        <div className="absolute bottom-0 left-0 p-3 text-white w-full">
-            <h4 className="font-semibold text-sm">{title}</h4>
-            <p className="text-xs opacity-80">{artist}</p>
-        </div>
+const FeatureItem = ({ icon, text }: { icon: React.ReactNode, text: string }) => (
+    <div className="flex items-center gap-3 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+        <div className="text-yellow-300">{icon}</div>
+        <span className="text-white font-medium text-sm">{text}</span>
     </div>
 );
 
-const PremiumScreen: React.FC<PremiumScreenProps> = ({ setCurrentPage, onBack }) => {
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
+const PremiumScreen: React.FC<PremiumScreenProps> = ({ setCurrentPage, onSubscribeClick, onTrialClick }) => {
+  return (
+    <div className="bg-gray-900 min-h-full relative overflow-hidden flex flex-col">
+      {/* Background Effects */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] bg-purple-600 rounded-full blur-[100px] opacity-50"></div>
+          <div className="absolute bottom-[10%] right-[-10%] w-[60%] h-[50%] bg-pink-600 rounded-full blur-[100px] opacity-50"></div>
+      </div>
 
-    const premiumDesigns = [
-        { imgSrc: "https://i.ibb.co/hLqGg3G/lip-gloss.png", title: "Lip Gloss Nails", artist: "by Alya Putri" },
-        { imgSrc: "https://i.ibb.co/dPGjv9W/velvet.png", title: "Velvet Nails", artist: "by Sarah Martinez" },
-        { imgSrc: "https://i.ibb.co/MnvkS1z/coquette.png", title: "Coquette / Balletcore", artist: "by Emma Rodriguez" },
-        { imgSrc: "https://i.ibb.co/L95tF1M/3d-embellished.png", title: "Gilded Botanicals", artist: "by Luna Chen" },
-    ];
-    
-    const handleUpgrade = () => {
-        setShowSuccessModal(true);
-    };
+      {/* Header */}
+      <div className="p-4 relative z-10 flex items-center justify-between">
+        <button onClick={() => setCurrentPage(Page.Dashboard)} className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 transition-colors">
+          <ChevronLeftIcon className="w-6 h-6"/>
+        </button>
+        <button onClick={() => setCurrentPage(Page.PremiumHelpCenter)} className="text-xs text-white/70 underline hover:text-white">
+            Bantuan
+        </button>
+      </div>
 
-    const handleCloseModalAndExplore = () => {
-        setShowSuccessModal(false);
-        setCurrentPage(Page.Catalog);
-    };
+      {/* Main Content */}
+      <div className="flex-grow flex flex-col items-center justify-start px-6 pt-2 relative z-10 text-center pb-24">
+          <div className="mb-4 animate-bounce-slow">
+            <CrownIcon className="w-16 h-16 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+          </div>
+          
+          <h1 className="text-2xl font-bold text-white mb-2 font-quicksand">Nailora Plus</h1>
+          <p className="text-gray-300 text-xs mb-6">Upgrade sekarang untuk fitur tanpa batas.</p>
 
-    const SuccessModal = () => (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center animate-fade-in p-4" onClick={handleCloseModalAndExplore}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm text-center p-6 text-gray-800" onClick={e => e.stopPropagation()}>
-                <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto animate-pulse mb-3" />
-                <h3 className="text-2xl font-bold text-nailora-purple">Upgrade Berhasil!</h3>
-                <p className="text-nailora-gray mt-1 mb-4">Selamat! Anda sekarang adalah anggota Nailora Plus.</p>
-                <div className="bg-gray-100 p-3 rounded-lg">
-                    <p className="text-sm font-semibold text-nailora-purple mb-3">Nikmati akses ke desain eksklusif ini:</p>
-                    <div className="grid grid-cols-4 gap-2">
-                        {premiumDesigns.map(design => (
-                            <img key={design.title} src={design.imgSrc} alt={design.title} className="w-full h-full object-cover rounded-md aspect-square" />
-                        ))}
-                    </div>
-                </div>
-                <button
-                    onClick={handleCloseModalAndExplore}
-                    className="w-full mt-6 bg-nailora-pink-accent text-white font-semibold py-3 rounded-lg shadow-lg hover:bg-opacity-90"
-                >
-                    Jelajahi Sekarang
-                </button>
-            </div>
-        </div>
-    );
+          {/* Features Grid */}
+          <div className="w-full space-y-2 mb-6">
+             <FeatureItem icon={<CrownIcon className="w-5 h-5"/>} text="Akses Semua Desain Premium" />
+             <FeatureItem icon={<SparklesIcon className="w-5 h-5"/>} text="AI Personal Nail Stylist" />
+             <FeatureItem icon={<CheckCircleIcon className="w-5 h-5"/>} text="Tutorial Premium Step-by-step" />
+             <FeatureItem icon={<UploadIcon className="w-5 h-5"/>} text="Upload Desain Unlimited" />
+             <FeatureItem icon={<span className="text-lg">🎁</span>} text="Bonus Reward & Desain Eksklusif" />
+          </div>
+          
+          {/* Launch Promo Banner */}
+           <div className="bg-gradient-to-r from-red-500 to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-full mb-4 shadow-lg animate-pulse">
+              🔥 PROMO LAUNCHING: Diskon 65% Bulan Pertama!
+          </div>
 
-    return (
-        <div className="bg-gray-900 text-white min-h-full pb-24">
-            {showSuccessModal && <SuccessModal />}
-            <div className="bg-gradient-to-b from-purple-500 to-pink-500 p-6 rounded-b-3xl relative">
-                <button onClick={onBack} className="absolute top-6 left-4 p-2">
-                  <ChevronLeftIcon className="w-6 h-6"/>
-                </button>
-                <div className="text-center pt-2">
-                    <h2 className="text-xl font-bold">💎 Nailora Plus</h2>
-                    <p className="text-sm opacity-90 mt-1">Buka Akses Konten Eksklusif</p>
-                </div>
-            </div>
+          {/* Pricing Card */}
+          <div className="w-full bg-gradient-to-br from-yellow-400 to-yellow-600 p-[1px] rounded-2xl shadow-2xl mb-4">
+              <div className="bg-gray-800 rounded-2xl p-5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-3 py-1 rounded-bl-xl">BEST VALUE</div>
+                  <p className="text-gray-400 text-xs">Langganan Bulanan</p>
+                  <div className="flex items-baseline justify-center mt-1 mb-3 gap-1">
+                      <span className="text-xs text-red-400 line-through decoration-red-400 mr-1">Rp 29.000</span>
+                      <span className="text-xs text-gray-400 align-top">Rp</span>
+                      <span className="text-3xl font-bold text-white">9.900</span>
+                      <span className="text-[10px] text-gray-400">/bulan pertama</span>
+                  </div>
+                  
+                  <button 
+                    onClick={onSubscribeClick}
+                    className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 rounded-xl shadow-lg hover:scale-[1.02] transition-transform active:scale-95 mb-3 text-sm"
+                  >
+                    Berlangganan Sekarang
+                  </button>
 
-            <div className="p-4">
-                <p className="text-center text-gray-400 mb-4">Dapatkan akses ke desain premium dari nail artist terbaik.</p>
-                 <div className="grid grid-cols-2 gap-4">
-                    {premiumDesigns.map(design => (
-                        <PremiumCard key={design.title} {...design} />
-                    ))}
-                 </div>
-                <button 
-                  onClick={handleUpgrade}
-                  className="w-full mt-8 bg-nailora-pink-accent font-semibold py-3 rounded-lg shadow-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 active:scale-100"
-                >
-                    Upgrade Sekarang
-                </button>
-            </div>
-            
-            <BottomNavBar activePage={-1 as Page} setCurrentPage={setCurrentPage} />
-        </div>
-    );
+                  <p className="text-[10px] text-gray-400">Perpanjangan otomatis Rp 29.000/bulan berikutnya.</p>
+              </div>
+          </div>
+
+          {/* Trial Button */}
+          <button 
+              onClick={onTrialClick}
+              className="text-white text-sm font-semibold underline decoration-white/50 hover:decoration-white"
+          >
+              Coba Gratis 3 Hari (Free Trial)
+          </button>
+          
+          <p className="text-[10px] text-gray-500 mt-6">
+              Aman & Terpercaya. Batalkan kapan saja.
+          </p>
+      </div>
+    </div>
+  );
 };
+
 export default PremiumScreen;

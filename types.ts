@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export enum Page {
@@ -11,24 +12,55 @@ export enum Page {
   Booking,
   Catalog,
   Community,
-  Premium,
   Payment,
   DesignDetail,
   About,
   BookingHistory,
   PartnerRegistration,
   Search,
+  Premium,
+  AIStylist,
+  SubscriptionCheckout,
+  SubscriptionManagement,
+  PremiumHelpCenter,
+  GiftPremium,
+  AdminDashboard,
 }
+
+export type SubscriptionTier = 'Gold' | 'Platinum' | 'Diamond';
+
+export type SubscriptionDetails = {
+    startDate: string;
+    nextBillingDate: string;
+    plan: 'Monthly' | 'Yearly' | 'Trial';
+    status: 'Active' | 'Canceled' | 'Expired';
+    method: string;
+    autoRenew: boolean;
+    tier: SubscriptionTier;
+};
 
 export type User = {
   id: number;
   name: string;
   email: string;
-  password?: string; // Password should not be passed around, but needed for creation
+  password?: string; 
   profileComplete: boolean;
   avatar: string;
+  isPremium?: boolean;
+  subscription?: SubscriptionDetails;
 };
 
+export type Artist = {
+  initial: string;
+  name: string;
+  rating: number;
+  reviews: number;
+  services: string[];
+  salon: string;
+  distance: number;
+  price: string;
+  available: boolean;
+};
 
 export type BookingDetails = {
     artist: {
@@ -43,18 +75,18 @@ export type BookingDetails = {
 export type Design = {
     imgSrc: string;
     title: string;
-    category: string;
-    isPremium?: boolean;
+    dominantColor: string; 
+    style: string; 
+    length: string; 
+    tags: string[]; 
     likes?: number;
     artist?: string;
     description?: string;
+    price?: string; 
+    isPremium?: boolean;
+    isArchived?: boolean;
 };
 
-export type Artist = {
-    initial: string, name: string, rating: number, reviews: number, services: string[], salon: string, distance: number, price: string, available: boolean
-};
-
-// FIX: Add definitions for Comment and Tutorial types used in community features to resolve import errors.
 export type Comment = {
   id: number;
   userName: string;
@@ -63,15 +95,31 @@ export type Comment = {
   timestamp: string;
 };
 
+export type TutorialCategory = 'Basic Step' | 'Tools & Preparation' | 'Beginner' | 'Intermediate' | 'Advanced' | 'Nail Care Tips' | 'Do & Don\'ts' | 'Troubleshooting';
+
+export type DifficultyLevel = 'Pemula' | 'Menengah' | 'Pro';
+
+export type TutorialStep = {
+    order: number;
+    title: string; 
+    description: string; 
+};
+
 export type Tutorial = {
-  id: number;
-  imgSrc: string;
-  title: string;
-  duration: string;
-  videoUrl?: string;
-  content?: React.ReactNode;
-  uploaderName: string;
-  uploaderAvatar: string;
-  likes: number;
-  comments: Comment[];
+    id: number;
+    title: string;
+    description: string; 
+    category: TutorialCategory;
+    difficulty: DifficultyLevel;
+    duration: string; 
+    tools?: string[]; 
+    imgSrc: string; 
+    steps: TutorialStep[]; 
+    notes?: string[]; 
+    uploaderName: string;
+    uploaderAvatar: string;
+    likes: number;
+    comments: Comment[];
+    content?: string;
+    isPremium?: boolean; 
 };

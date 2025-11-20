@@ -1,17 +1,13 @@
+
 import React from 'react';
 
 export const NailoraLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg" {...props}>
       <g transform="translate(10, 0)" stroke="currentColor" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        {/* Hand */}
         <path d="M 80 110 C 70 80, 75 60, 85 45 L 87 25 C 87 20, 92 20, 92 25 L 90 50 C 90 45, 95 45, 95 50 L 97 20 C 97 15, 102 15, 102 20 L 100 55 C 100 50, 105 50, 105 55 L 107 35 C 107 30, 112 30, 112 35 L 110 60 C 120 80, 125 100, 105 110" />
-        {/* Thumb */}
         <path d="M 92 70 C 85 72, 80 78, 82 85" />
-        {/* Flower */}
         <path d="M 100 58 L 118 10" />
-        {/* Petals */}
         <path d="M118,10 C123,-2 133,-2 133,10 C138,22 128,27 118,22 C108,27 98,22 103,10 C103,-2 113,-2 118,10z" />
-         {/* Leaf */}
          <path d="M112 30 C 117 25, 124 27, 122 35" />
       </g>
       <text 
@@ -26,7 +22,6 @@ export const NailoraLogo = (props: React.SVGProps<SVGSVGElement>) => (
       </text>
     </svg>
 );
-
 
 export const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -74,7 +69,7 @@ export const FilterIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
 );
 export const ChevronLeftIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
 );
 export const UploadIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
@@ -118,12 +113,6 @@ export const TrashIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-export const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-);
-
 export const DocumentTextIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625a3.375 3.375 0 00-3.375 3.375v11.25a3.375 3.375 0 003.375 3.375h12.75a3.375 3.375 0 003.375-3.375V8.25a3.375 3.375 0 00-3.375-3.375h-1.5m-3 1.5v-1.5m-3.75 3.75h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A1.125 1.125 0 015.625 6H9" />
@@ -146,4 +135,34 @@ export const PencilIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />
     </svg>
+);
+
+export const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="none" />
+    </svg>
+);
+
+export const SparklesIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    </svg>
+);
+
+export const LockClosedIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+  </svg>
+);
+
+export const ArchiveBoxIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+  </svg>
+);
+
+export const XCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
 );
